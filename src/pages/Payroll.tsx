@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { calculatePayroll, formatKina, type PayrollResult } from "@/lib/payroll-engine";
+import { formatKina } from "@/lib/payroll-engine";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,8 +18,18 @@ interface Employee {
   is_resident: boolean;
 }
 
-interface EntryPreview extends PayrollResult {
+interface EntryPreview {
   employee: Employee;
+  grossEarnings: number;
+  fortnightlyPaye: number;
+  employeeSuper: number;
+  employerSuper: number;
+  otherDeductions: number;
+  netPay: number;
+  basePay: number;
+  overtimePay: number;
+  calculationLog: string[];
+  effectiveTaxRate: string;
 }
 
 export default function Payroll() {
@@ -39,13 +49,41 @@ export default function Payroll() {
   const runCalculations = () => {
     if (!periodStart || !periodEnd) { toast.error("Set period dates"); return; }
     const results = employees.map((emp) => {
-      const result = calculatePayroll({
-        baseSalary: Number(emp.base_salary),
-        overtimeHours: 0,
-        allowances: [],
-        isResident: emp.is_resident,
-      });
-      return { ...result, employee: emp };
+      const basePay = Number(emp.base_salary);
+      const grossEarnings = basePay;
+      const annualized = grossEarnings * 26;
+      // Simple 2026 resident/non-resident calc
+      let annualPaye = 0;
+      if (emp.is_resident) {
+        if (annualized > 250000) annualPaye = 88850 + (annualized - 250000) * 0.42;
+        else if (annualized > 70000) annualPaye = 16850 + (annualized - 70000) * 0.40;
+        else if (annualized > 33000) annualPaye = 3900 + (annualized - 33000) * 0.35;
+        else if (annualized > 20000) annualPaye = (annualized - 20000) * 0.30;
+      } else {
+        if (annualized > 250000) annualPaye = 93250 + (annualized - 250000) * 0.42;
+        else if (annualized > 70000) annualPaye = 21250 + (annualized - 70000) * 0.40;
+        else if (annualized > 33000) annualPaye = 8300 + (annualized - 33000) * 0.35;
+        else if (annualized > 20000) annualPaye = 4400 + (annualized - 20000) * 0.30;
+        else annualPaye = annualized * 0.22;
+      }
+      const fortnightlyPaye = Number((annualPaye / 26).toFixed(2));
+      const employeeSuper = Number((grossEarnings * 0.06).toFixed(2));
+      const employerSuper = Number((grossEarnings * 0.084).toFixed(2));
+      const netPay = Number((grossEarnings - fortnightlyPaye - employeeSuper).toFixed(2));
+      const effectiveTaxRate = grossEarnings > 0 ? ((fortnightlyPaye / grossEarnings) * 100).toFixed(1) : '0.0';
+      return {
+        employee: emp,
+        grossEarnings,
+        fortnightlyPaye,
+        employeeSuper,
+        employerSuper,
+        otherDeductions: 0,
+        netPay,
+        basePay,
+        overtimePay: 0,
+        calculationLog: [`Annualized: K${annualized}`, `Annual PAYE: K${annualPaye.toFixed(2)}`],
+        effectiveTaxRate,
+      } as EntryPreview;
     });
     setEntries(results);
     setStep(2);
