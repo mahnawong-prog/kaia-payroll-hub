@@ -1,23 +1,28 @@
-export type UserRole = 'ceo' | 'manager' | 'supervisor' | 'worker' | 'accountant';
+export type UserRole = 'ceo' | 'supervisor' | 'worker';
 export type EmploymentType = 'permanent' | 'temporary';
 export type ApprovalStatus = 'pending' | 'approved' | 'rejected';
 
 export interface UserProfile {
   id: string;
-  full_name: string;
+  full_name: string | null;
   email: string | null;
   phone: string | null;
   position: string | null;
   department: string | null;
-  employment_type: EmploymentType;
+  employment_type: EmploymentType | null;
   supervisor_id: string | null;
   avatar_url: string | null;
   location: string | null;
-  hourly_rate: number;
-  account_status: ApprovalStatus;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
+  hourly_rate: number | null;
+  base_salary: number | null;
+  worker_type: 'permanent' | 'temporary' | null;
+  is_resident: boolean | null;
+  super_enabled: boolean | null;
+  account_status: ApprovalStatus | null;
+  is_active: boolean | null;
+  created_at: string | null;
+  updated_at: string | null;
+  employee_id: string | null;
 }
 
 export interface UserRoleRecord {

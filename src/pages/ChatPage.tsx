@@ -19,7 +19,7 @@ export default function ChatPage() {
   const [broadcastRole, setBroadcastRole] = useState<string>('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const canBroadcast = ['ceo', 'manager'].includes(primaryRole);
+  const canBroadcast = primaryRole === 'ceo';
 
   const { data: contacts, isLoading: loadingContacts } = useContacts();
   const { data: messages, isLoading: loadingMessages } = useConversation(selectedContactId);
@@ -93,8 +93,6 @@ export default function ChatPage() {
                 <SelectContent>
                   <SelectItem value="worker">All Workers</SelectItem>
                   <SelectItem value="supervisor">All Supervisors</SelectItem>
-                  <SelectItem value="manager">All Managers</SelectItem>
-                  <SelectItem value="accountant">All Accountants</SelectItem>
                 </SelectContent>
               </Select>
             </div>

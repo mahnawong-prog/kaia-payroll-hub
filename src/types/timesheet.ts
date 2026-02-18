@@ -13,14 +13,19 @@ export interface TimesheetEntry {
 
 export interface Payslip {
   id: string;
-  workerId: string;
-  periodStart: Date;
-  periodEnd: Date;
-  totalHours: number;
-  hourlyRate: number;
-  grossPay: number;
+  worker_id: string;
+  period_start: string;
+  period_end: string;
+  total_hours: number;
+  hourly_rate: number;
+  gross_pay: number;
   deductions: number;
-  netPay: number;
-  generatedAt: Date;
-  pdfUrl?: string;
+  net_pay: number;
+  status: 'draft' | 'generated' | 'paid';
+  generated_by?: string | null;
+  paid_by?: string | null;
+  paid_at?: string | null;
+  notes?: string | null;
+  created_at: string;
+  updated_at: string;
 }

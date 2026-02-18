@@ -116,7 +116,7 @@ export function useSendMessage() {
       receiverId?: string;
       content: string;
       isBroadcast?: boolean;
-      broadcastToRole?: 'ceo' | 'manager' | 'supervisor' | 'worker' | 'accountant';
+      broadcastToRole?: 'ceo' | 'supervisor' | 'worker';
     }) => {
       const { data, error } = await supabase
         .from('messages')

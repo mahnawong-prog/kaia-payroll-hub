@@ -173,7 +173,7 @@ export default function WorkerDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Link to="/payslips"><Button variant="outline" className="w-full gap-2">View & Download <ArrowRight size={14} /></Button></Link>
+            <Link to="/my-payslips"><Button variant="outline" className="w-full gap-2">View & Download <ArrowRight size={14} /></Button></Link>
           </CardContent>
         </Card>
 

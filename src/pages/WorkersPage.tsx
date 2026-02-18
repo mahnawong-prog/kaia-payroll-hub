@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Users, Search, Loader2, Eye, ClipboardList, Info, CheckCircle, AlertCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAllProfiles } from "@/hooks/useProfile";
+import type { Database } from "@/integrations/supabase/types";
 import { useToast } from "@/hooks/use-toast";
 import { PendingApprovals } from "@/components/workers/PendingApprovals";
 import { WorkerDetailPanel } from "@/components/workers/WorkerDetailPanel";
@@ -245,7 +246,9 @@ export default function WorkersPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedWorkerId, setSelectedWorkerId] = useState<string | null>(null);
 
-  const { data: profiles, isLoading } = useAllProfiles();
+  const { data: profilesData, isLoading } = useAllProfiles();
+  type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
+  const profiles = profilesData as ProfileRow[] | null;
 
   const isAdmin = ['ceo', 'manager'].includes(primaryRole);
   const isSupervisor = primaryRole === 'supervisor';
@@ -261,7 +264,7 @@ export default function WorkersPage() {
 
   const permanentWorkers = filterWorkers('permanent');
   const temporaryWorkers = filterWorkers('temporary');
-  const selectedWorker = profiles?.find((p: any) => p.id === selectedWorkerId);
+  const selectedWorker = (profiles as ProfileRow[] | null)?.find((p: ProfileRow) => p.id === selectedWorkerId) || null;
 
   return (
     <div className="space-y-6">

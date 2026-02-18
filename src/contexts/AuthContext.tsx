@@ -13,6 +13,9 @@ interface AuthContextType extends AuthState {
   refreshProfile: () => Promise<void>;
   primaryRole: UserRole;
   isEmailVerified: boolean;
+  isCEO: boolean;
+  isSupervisor: boolean;
+  isWorker: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -80,20 +83,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [fetchProfile]);
 
   const signUp = async (email: string, password: string, fullName: string, phone: string) => {
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/login`,
         data: { full_name: fullName, phone },
-        // Disable email verification requirement
-        emailRedirectTo: undefined,
       },
     });
-    
-    // Always return false for needsVerification to allow immediate login
+
     const needsVerification = false;
-    
+
     return { error, needsVerification };
   };
 
@@ -131,10 +130,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Determine primary role (highest privilege)
-  const rolePriority: UserRole[] = ['ceo', 'manager', 'accountant', 'supervisor', 'worker'];
+  const rolePriority: UserRole[] = ['ceo', 'supervisor', 'worker'];
   const primaryRole = rolePriority.find(r => roles.includes(r)) || 'worker';
 
   const isApproved = user?.account_status === 'approved';
+
+  // Role helpers for UI
+  const isCEO = roles.includes('ceo');
+  const isSupervisor = roles.includes('supervisor');
+  const isWorker = roles.includes('worker');
 
   return (
     <AuthContext.Provider
@@ -147,6 +151,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isApproved,
         isEmailVerified,
         primaryRole,
+        isCEO,
+        isSupervisor,
+        isWorker,
         signUp,
         signIn,
         signOut,

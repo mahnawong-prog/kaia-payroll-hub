@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { User, Mail, Phone, MapPin, Calendar, Briefcase, Edit, Building, Loader2, Save, X, Shield, Users, BarChart3, ClipboardList } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfile, useUpdateProfile, useBankDetails, useUpsertBankDetails } from "@/hooks/useProfile";
+import type { Database } from "@/integrations/supabase/types";
 import { useTimesheets } from "@/hooks/useTimesheets";
 import { usePayslips } from "@/hooks/usePayslips";
 import { useContracts } from "@/hooks/useContracts";
@@ -17,7 +18,9 @@ import { WorkSummarySection } from "@/components/workers/WorkSummarySection";
 
 export default function ProfilePage() {
   const { user, primaryRole, roles } = useAuth();
-  const { data: profile, isLoading } = useProfile();
+  const { data, isLoading } = useProfile();
+  type ProfileRow = import("@/integrations/supabase/types").Database["public"]["Tables"]["profiles"]["Row"];
+  const profile = data as ProfileRow | null;
   const { data: bankDetails } = useBankDetails();
   const { data: timesheets } = useTimesheets();
   const { data: payslips } = usePayslips();

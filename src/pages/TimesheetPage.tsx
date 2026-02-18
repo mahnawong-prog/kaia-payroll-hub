@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Clock, Calendar, Send, CheckCircle2, AlertCircle, XCircle, Loader2, Filter } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTimesheets, useCreateTimesheet, useUpdateTimesheetStatus } from "@/hooks/useTimesheets";
+import type { Database } from "@/integrations/supabase/types";
 import { useAllProfiles } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
 
@@ -40,17 +41,23 @@ export default function TimesheetPage() {
   const [taskDescription, setTaskDescription] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
-  const { data: timesheets, isLoading: loadingTimesheets } = useTimesheets();
-  const { data: allProfiles } = useAllProfiles();
+  const { data, isLoading: loadingTimesheets } = useTimesheets();
+  type TimesheetRow = Database["public"]["Tables"]["timesheets"]["Row"];
+  const timesheets = data as TimesheetRow[] | null;
+  const { data: allProfilesData } = useAllProfiles();
+  type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
+  const allProfiles = allProfilesData as ProfileRow[] | null;
   const createTimesheet = useCreateTimesheet();
   const updateStatus = useUpdateTimesheetStatus();
 
   // Get workers: for supervisors show their assigned workers + all if manager/ceo
-  const assignedWorkers = allProfiles?.filter(p => {
-    if (primaryRole === 'manager' || primaryRole === 'ceo') return p.id !== user?.id;
-    if (primaryRole === 'supervisor') return p.supervisor_id === user?.id;
-    return false;
-  }) || [];
+  const assignedWorkers = Array.isArray(allProfiles)
+    ? (allProfiles as ProfileRow[]).filter(p => {
+        if (primaryRole === 'manager' || primaryRole === 'ceo') return p.id !== user?.id;
+        if (primaryRole === 'supervisor') return p.supervisor_id === user?.id;
+        return false;
+      })
+    : [];
 
   const calculateHours = () => {
     if (!clockIn || !clockOut) return 0;

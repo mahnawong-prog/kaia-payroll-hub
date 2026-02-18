@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
 import { useAuth } from "@/contexts/AuthContext";
 
 export function useProfile(userId?: string) {
@@ -58,10 +59,11 @@ export function useAllProfiles() {
 }
 
 export function useBankDetails(userId?: string) {
+  type BankDetails = Database["public"]["Tables"]["bank_details"]["Row"];
   const { user } = useAuth();
   const id = userId || user?.id;
 
-  return useQuery({
+  return useQuery<BankDetails | null>({
     queryKey: ['bank-details', id],
     queryFn: async () => {
       if (!id) return null;
@@ -71,7 +73,7 @@ export function useBankDetails(userId?: string) {
         .eq('user_id', id)
         .maybeSingle();
       if (error) throw error;
-      return data;
+      return data as BankDetails | null;
     },
     enabled: !!id,
   });
