@@ -53,7 +53,7 @@ export default function PayrollWizard() {
         const result = calculateWorkerPayroll({
           worker: worker as any,
           attendance: attendance ?? [],
-          isResident: worker.is_resident ?? true,
+          isResident: (worker as any).is_resident ?? true,
         });
 
         const { data: entry, error: entryError } = await supabase

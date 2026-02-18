@@ -4,14 +4,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
-const clockSchema = z.object({
-  worker_id: z.string().uuid(),
-});
+const db = supabase as any;
 
-const clockOutSchema = z.object({
-  attendance_id: z.string().uuid(),
-});
-
+const clockSchema = z.object({ worker_id: z.string().uuid() });
+const clockOutSchema = z.object({ attendance_id: z.string().uuid() });
 const attendanceDecisionSchema = z.object({
   attendance_id: z.string().uuid(),
   status: z.enum(["approved", "rejected"]),
@@ -22,12 +18,11 @@ const attendanceDecisionSchema = z.object({
 
 export function useAttendance() {
   const { user } = useAuth();
-
   return useQuery({
     queryKey: ["attendance", user?.id],
     enabled: !!user?.id,
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("attendance")
         .select("*")
         .eq("worker_id", user!.id)
@@ -40,18 +35,16 @@ export function useAttendance() {
 
 export function useTeamAttendance() {
   const { user, isSupervisor } = useAuth();
-
   return useQuery({
     queryKey: ["team-attendance", user?.id],
     enabled: !!user?.id && isSupervisor,
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("attendance")
-        .select("*, worker:profiles!attendance_worker_id_fkey(id, full_name, worker_type, supervisor_id)")
+        .select("*, worker:profiles(id, full_name)")
         .order("created_at", { ascending: false });
       if (error) throw error;
-
-      return (data ?? []).filter((row: any) => row.worker?.supervisor_id === user?.id);
+      return data ?? [];
     },
   });
 }
@@ -59,34 +52,17 @@ export function useTeamAttendance() {
 export function useClockIn() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async () => {
       const parsed = clockSchema.parse({ worker_id: user?.id });
       const payload = { worker_id: parsed.worker_id, clock_in: new Date().toISOString(), status: "pending" };
-
-      const previous = queryClient.getQueryData<any[]>(["attendance", user?.id]) ?? [];
-      const optimistic = [{ id: `optimistic-in-${Date.now()}`, ...payload, clock_out: null }, ...previous];
-      queryClient.setQueryData(["attendance", user?.id], optimistic);
-
-      const { data, error } = await supabase.from("attendance").insert(payload).select().single();
-      if (error) {
-        queryClient.setQueryData(["attendance", user?.id], previous);
-        throw error;
-      }
-
-      await supabase.from("audit_log").insert({
-        user_id: user?.id ?? null,
-        action: "clock_in",
-        target_table: "attendance",
-        target_id: data.id,
-        details: payload,
-      });
-
+      const { data, error } = await db.from("attendance").insert(payload).select().single();
+      if (error) throw error;
+      await db.from("audit_log").insert({ user_id: user?.id, action: "clock_in", target_table: "attendance", target_id: data.id, details: payload });
       return data;
     },
     onSuccess: () => {
-      toast.success("Clock in recorded. Waiting for supervisor approval.");
+      toast.success("Clock in recorded.");
       queryClient.invalidateQueries({ queryKey: ["attendance", user?.id] });
     },
     onError: (error: any) => toast.error(error.message ?? "Clock in failed"),
@@ -96,13 +72,11 @@ export function useClockIn() {
 export function useClockOut() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async (attendanceId: string) => {
       const parsed = clockOutSchema.parse({ attendance_id: attendanceId });
       const nowIso = new Date().toISOString();
-
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("attendance")
         .update({ clock_out: nowIso, status: "pending" })
         .eq("id", parsed.attendance_id)
@@ -110,19 +84,11 @@ export function useClockOut() {
         .select()
         .single();
       if (error) throw error;
-
-      await supabase.from("audit_log").insert({
-        user_id: user?.id ?? null,
-        action: "clock_out",
-        target_table: "attendance",
-        target_id: data.id,
-        details: { clock_out: nowIso },
-      });
-
+      await db.from("audit_log").insert({ user_id: user?.id, action: "clock_out", target_table: "attendance", target_id: data.id, details: { clock_out: nowIso } });
       return data;
     },
     onSuccess: () => {
-      toast.success("Clock out recorded. Waiting for supervisor approval.");
+      toast.success("Clock out recorded.");
       queryClient.invalidateQueries({ queryKey: ["attendance", user?.id] });
     },
     onError: (error: any) => toast.error(error.message ?? "Clock out failed"),
@@ -132,11 +98,9 @@ export function useClockOut() {
 export function useReviewAttendance() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async (payload: z.infer<typeof attendanceDecisionSchema>) => {
       const parsed = attendanceDecisionSchema.parse(payload);
-
       const updates: Record<string, any> = {
         status: parsed.status,
         notes: parsed.notes ?? null,
@@ -146,22 +110,14 @@ export function useReviewAttendance() {
       if (parsed.clock_in) updates.clock_in = parsed.clock_in;
       if (parsed.clock_out) updates.clock_out = parsed.clock_out;
 
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("attendance")
         .update(updates)
         .eq("id", parsed.attendance_id)
-        .select("*, worker:profiles!attendance_worker_id_fkey(id)")
+        .select()
         .single();
       if (error) throw error;
-
-      await supabase.from("audit_log").insert({
-        user_id: user?.id ?? null,
-        action: `attendance_${parsed.status}`,
-        target_table: "attendance",
-        target_id: parsed.attendance_id,
-        details: updates,
-      });
-
+      await db.from("audit_log").insert({ user_id: user?.id, action: `attendance_${parsed.status}`, target_table: "attendance", target_id: parsed.attendance_id, details: updates });
       return data;
     },
     onSuccess: () => {

@@ -44,9 +44,8 @@ export default function ChatPage() {
       if (broadcastRole) {
         await sendMessage.mutateAsync({
           senderId: user.id,
+          receiverId: user.id,
           content: message.trim(),
-          isBroadcast: true,
-          broadcastToRole: broadcastRole as any,
         });
         setMessage('');
         setBroadcastRole('');

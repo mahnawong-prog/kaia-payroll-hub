@@ -2,19 +2,16 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
+const db = supabase as any;
+
 export function useWorkSummaries(workerId?: string) {
   const { user } = useAuth();
   const id = workerId || user?.id;
-
   return useQuery({
     queryKey: ['work-summaries', id],
     queryFn: async () => {
       if (!id) return [];
-      const { data, error } = await supabase
-        .from('work_summaries')
-        .select('*')
-        .eq('worker_id', id)
-        .order('period_end', { ascending: false });
+      const { data, error } = await db.from('work_summaries').select('*').eq('worker_id', id).order('period_end', { ascending: false });
       if (error) throw error;
       return data;
     },
@@ -26,10 +23,7 @@ export function useAllWorkSummaries() {
   return useQuery({
     queryKey: ['work-summaries-all'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('work_summaries')
-        .select('*, worker:profiles!work_summaries_worker_id_fkey(full_name, position)')
-        .order('period_end', { ascending: false });
+      const { data, error } = await db.from('work_summaries').select('*').order('period_end', { ascending: false });
       if (error) throw error;
       return data;
     },
@@ -38,37 +32,21 @@ export function useAllWorkSummaries() {
 
 export function useCreateWorkSummary() {
   const queryClient = useQueryClient();
-
   return useMutation({
-    mutationFn: async (summary: {
-      worker_id: string;
-      period_start: string;
-      period_end: string;
-      summary: string;
-      tasks_completed?: string;
-      challenges?: string;
-      next_period_goals?: string;
-    }) => {
-      const { data, error } = await supabase
-        .from('work_summaries')
-        .insert(summary)
-        .select()
-        .single();
+    mutationFn: async (summary: any) => {
+      const { data, error } = await db.from('work_summaries').insert(summary).select().single();
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['work-summaries'] });
-    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['work-summaries'] }); },
   });
 }
 
 export function useReviewWorkSummary() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async ({ id, status, reviewedBy }: { id: string; status: string; reviewedBy: string }) => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from('work_summaries')
         .update({ status, reviewed_by: reviewedBy, reviewed_at: new Date().toISOString() })
         .eq('id', id)
@@ -84,7 +62,6 @@ export function useReviewWorkSummary() {
   });
 }
 
-/** Calculate the current fortnightly period */
 export function getCurrentFortnightPeriod(): { start: string; end: string } {
   const now = new Date();
   const day = now.getDate();
