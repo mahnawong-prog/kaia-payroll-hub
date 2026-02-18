@@ -1,17 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
+const db = supabase as any;
+
 export function useFinancialTransactions() {
   return useQuery({
     queryKey: ['financial-transactions'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from('financial_transactions')
-        .select(`
-          *,
-          worker:profiles!financial_transactions_related_worker_id_fkey(full_name),
-          recorder:profiles!financial_transactions_recorded_by_fkey(full_name)
-        `)
+        .select('*')
         .order('transaction_date', { ascending: false });
       if (error) throw error;
       return data;
@@ -21,20 +19,9 @@ export function useFinancialTransactions() {
 
 export function useCreateTransaction() {
   const queryClient = useQueryClient();
-
   return useMutation({
-    mutationFn: async (transaction: {
-      transaction_type: 'payroll' | 'expense' | 'reimbursement' | 'bonus' | 'deduction';
-      amount: number;
-      description?: string;
-      related_payslip_id?: string;
-      related_worker_id?: string;
-      recorded_by: string;
-      category?: string;
-      reference_number?: string;
-      transaction_date?: string;
-    }) => {
-      const { data, error } = await supabase
+    mutationFn: async (transaction: any) => {
+      const { data, error } = await db
         .from('financial_transactions')
         .insert([transaction])
         .select()
@@ -52,19 +39,19 @@ export function useFinancialSummary() {
   return useQuery({
     queryKey: ['financial-summary'],
     queryFn: async () => {
-      const { data: transactions, error } = await supabase
+      const { data: transactions, error } = await db
         .from('financial_transactions')
         .select('transaction_type, amount, transaction_date');
       if (error) throw error;
 
-      const { data: payslips } = await supabase
-        .from('payslips')
+      const { data: entries } = await db
+        .from('payroll_entries')
         .select('status, gross_pay, net_pay, deductions');
 
-      const totalPayroll = payslips?.filter(p => p.status === 'paid').reduce((sum, p) => sum + Number(p.net_pay), 0) || 0;
-      const pendingPayroll = payslips?.filter(p => p.status === 'generated').reduce((sum, p) => sum + Number(p.net_pay), 0) || 0;
-      const totalExpenses = transactions?.filter(t => t.transaction_type === 'expense').reduce((sum, t) => sum + Number(t.amount), 0) || 0;
-      const totalDeductions = payslips?.reduce((sum, p) => sum + Number(p.deductions), 0) || 0;
+      const totalPayroll = entries?.filter((p: any) => p.status === 'paid').reduce((sum: number, p: any) => sum + Number(p.net_pay), 0) || 0;
+      const pendingPayroll = entries?.filter((p: any) => p.status === 'generated').reduce((sum: number, p: any) => sum + Number(p.net_pay), 0) || 0;
+      const totalExpenses = transactions?.filter((t: any) => t.transaction_type === 'expense').reduce((sum: number, t: any) => sum + Number(t.amount), 0) || 0;
+      const totalDeductions = entries?.reduce((sum: number, p: any) => sum + Number(p.deductions || 0), 0) || 0;
 
       return { totalPayroll, pendingPayroll, totalExpenses, totalDeductions };
     },

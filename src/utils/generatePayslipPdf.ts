@@ -45,7 +45,7 @@ export async function generatePayslipPdf(payslip: PayslipData) {
   ];
 
   const pdf = await generatorModule.generate({ template, inputs });
-  const blob = new Blob([pdf], { type: 'application/pdf' });
+  const blob = new Blob([new Uint8Array(pdf as any)], { type: 'application/pdf' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;

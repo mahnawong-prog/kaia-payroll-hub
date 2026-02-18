@@ -14,6 +14,105 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_approvals: {
+        Row: {
+          created_at: string | null
+          id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      attendance: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          clock_in: string
+          clock_out: string | null
+          created_at: string | null
+          id: string
+          notes: string | null
+          status: string | null
+          updated_at: string | null
+          worker_id: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          clock_in?: string
+          clock_out?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          status?: string | null
+          updated_at?: string | null
+          worker_id: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          clock_in?: string
+          clock_out?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          status?: string | null
+          updated_at?: string | null
+          worker_id?: string
+        }
+        Relationships: []
+      }
+      audit_log: {
+        Row: {
+          action: string | null
+          created_at: string | null
+          details: Json | null
+          id: string
+          target_id: string | null
+          target_table: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action?: string | null
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          target_id?: string | null
+          target_table?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string | null
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          target_id?: string | null
+          target_table?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       audit_logs: {
         Row: {
           action: string | null
@@ -44,6 +143,87 @@ export type Database = {
           old_data?: Json | null
           record_id?: string | null
           table_name?: string | null
+        }
+        Relationships: []
+      }
+      bank_details: {
+        Row: {
+          account_name: string | null
+          account_number: string | null
+          bank_name: string | null
+          branch: string | null
+          bsb_code: string | null
+          created_at: string | null
+          id: string
+          swift_code: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          account_name?: string | null
+          account_number?: string | null
+          bank_name?: string | null
+          branch?: string | null
+          bsb_code?: string | null
+          created_at?: string | null
+          id?: string
+          swift_code?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          account_name?: string | null
+          account_number?: string | null
+          bank_name?: string | null
+          branch?: string | null
+          bsb_code?: string | null
+          created_at?: string | null
+          id?: string
+          swift_code?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      contracts: {
+        Row: {
+          approved_by: string | null
+          created_at: string | null
+          daily_rate: number | null
+          description: string | null
+          end_date: string
+          hourly_rate: number | null
+          id: string
+          is_active: boolean | null
+          start_date: string
+          updated_at: string | null
+          worker_id: string
+        }
+        Insert: {
+          approved_by?: string | null
+          created_at?: string | null
+          daily_rate?: number | null
+          description?: string | null
+          end_date: string
+          hourly_rate?: number | null
+          id?: string
+          is_active?: boolean | null
+          start_date: string
+          updated_at?: string | null
+          worker_id: string
+        }
+        Update: {
+          approved_by?: string | null
+          created_at?: string | null
+          daily_rate?: number | null
+          description?: string | null
+          end_date?: string
+          hourly_rate?: number | null
+          id?: string
+          is_active?: boolean | null
+          start_date?: string
+          updated_at?: string | null
+          worker_id?: string
         }
         Relationships: []
       }
@@ -104,6 +284,51 @@ export type Database = {
           tin?: string | null
           updated_at?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      financial_transactions: {
+        Row: {
+          amount: number
+          category: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          recorded_by: string | null
+          reference_number: string | null
+          related_payslip_id: string | null
+          related_worker_id: string | null
+          transaction_date: string | null
+          transaction_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          amount?: number
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          recorded_by?: string | null
+          reference_number?: string | null
+          related_payslip_id?: string | null
+          related_worker_id?: string | null
+          transaction_date?: string | null
+          transaction_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          recorded_by?: string | null
+          reference_number?: string | null
+          related_payslip_id?: string | null
+          related_worker_id?: string | null
+          transaction_date?: string | null
+          transaction_type?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -183,10 +408,12 @@ export type Database = {
           calculation_log: Json | null
           created_at: string | null
           cycle_id: string | null
+          deductions: number | null
           employee_id: string | null
           employee_super: number | null
           employer_super: number | null
           gross_earnings: number | null
+          gross_pay: number | null
           id: string
           net_pay: number | null
           other_deductions: number | null
@@ -194,7 +421,13 @@ export type Database = {
           overtime_pay: number | null
           paye_tax: number | null
           payslip_url: string | null
+          period_end: string | null
+          period_start: string | null
+          status: string | null
+          super: number | null
+          tax: number | null
           updated_at: string | null
+          worker_id: string | null
         }
         Insert: {
           allowances?: Json | null
@@ -202,10 +435,12 @@ export type Database = {
           calculation_log?: Json | null
           created_at?: string | null
           cycle_id?: string | null
+          deductions?: number | null
           employee_id?: string | null
           employee_super?: number | null
           employer_super?: number | null
           gross_earnings?: number | null
+          gross_pay?: number | null
           id?: string
           net_pay?: number | null
           other_deductions?: number | null
@@ -213,7 +448,13 @@ export type Database = {
           overtime_pay?: number | null
           paye_tax?: number | null
           payslip_url?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          status?: string | null
+          super?: number | null
+          tax?: number | null
           updated_at?: string | null
+          worker_id?: string | null
         }
         Update: {
           allowances?: Json | null
@@ -221,10 +462,12 @@ export type Database = {
           calculation_log?: Json | null
           created_at?: string | null
           cycle_id?: string | null
+          deductions?: number | null
           employee_id?: string | null
           employee_super?: number | null
           employer_super?: number | null
           gross_earnings?: number | null
+          gross_pay?: number | null
           id?: string
           net_pay?: number | null
           other_deductions?: number | null
@@ -232,7 +475,13 @@ export type Database = {
           overtime_pay?: number | null
           paye_tax?: number | null
           payslip_url?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          status?: string | null
+          super?: number | null
+          tax?: number | null
           updated_at?: string | null
+          worker_id?: string | null
         }
         Relationships: [
           {
@@ -253,28 +502,67 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_status: string | null
           avatar_url: string | null
+          base_salary: number | null
           created_at: string | null
+          department: string | null
+          email: string | null
           employee_id: string | null
+          employment_type: string | null
           full_name: string | null
+          hourly_rate: number | null
           id: string
+          is_active: boolean | null
+          location: string | null
+          phone: string | null
+          position: string | null
+          super_enabled: boolean | null
+          supervisor_id: string | null
           updated_at: string | null
+          worker_type: string | null
         }
         Insert: {
+          account_status?: string | null
           avatar_url?: string | null
+          base_salary?: number | null
           created_at?: string | null
+          department?: string | null
+          email?: string | null
           employee_id?: string | null
+          employment_type?: string | null
           full_name?: string | null
+          hourly_rate?: number | null
           id: string
+          is_active?: boolean | null
+          location?: string | null
+          phone?: string | null
+          position?: string | null
+          super_enabled?: boolean | null
+          supervisor_id?: string | null
           updated_at?: string | null
+          worker_type?: string | null
         }
         Update: {
+          account_status?: string | null
           avatar_url?: string | null
+          base_salary?: number | null
           created_at?: string | null
+          department?: string | null
+          email?: string | null
           employee_id?: string | null
+          employment_type?: string | null
           full_name?: string | null
+          hourly_rate?: number | null
           id?: string
+          is_active?: boolean | null
+          location?: string | null
+          phone?: string | null
+          position?: string | null
+          super_enabled?: boolean | null
+          supervisor_id?: string | null
           updated_at?: string | null
+          worker_type?: string | null
         }
         Relationships: [
           {
@@ -307,6 +595,54 @@ export type Database = {
         }
         Relationships: []
       }
+      timesheets: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          clock_in: string | null
+          clock_out: string | null
+          created_at: string | null
+          date: string
+          id: string
+          status: string | null
+          supervisor_id: string | null
+          task_description: string | null
+          total_hours: number | null
+          updated_at: string | null
+          worker_id: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          clock_in?: string | null
+          clock_out?: string | null
+          created_at?: string | null
+          date: string
+          id?: string
+          status?: string | null
+          supervisor_id?: string | null
+          task_description?: string | null
+          total_hours?: number | null
+          updated_at?: string | null
+          worker_id: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          clock_in?: string | null
+          clock_out?: string | null
+          created_at?: string | null
+          date?: string
+          id?: string
+          status?: string | null
+          supervisor_id?: string | null
+          task_description?: string | null
+          total_hours?: number | null
+          updated_at?: string | null
+          worker_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null
@@ -325,6 +661,54 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      work_summaries: {
+        Row: {
+          challenges: string | null
+          created_at: string | null
+          id: string
+          next_period_goals: string | null
+          period_end: string
+          period_start: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string | null
+          summary: string | null
+          tasks_completed: string | null
+          updated_at: string | null
+          worker_id: string
+        }
+        Insert: {
+          challenges?: string | null
+          created_at?: string | null
+          id?: string
+          next_period_goals?: string | null
+          period_end: string
+          period_start: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          summary?: string | null
+          tasks_completed?: string | null
+          updated_at?: string | null
+          worker_id: string
+        }
+        Update: {
+          challenges?: string | null
+          created_at?: string | null
+          id?: string
+          next_period_goals?: string | null
+          period_end?: string
+          period_start?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          summary?: string | null
+          tasks_completed?: string | null
+          updated_at?: string | null
+          worker_id?: string
         }
         Relationships: []
       }
