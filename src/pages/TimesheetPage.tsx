@@ -32,7 +32,7 @@ const getStatusBadge = (status: string) => {
 export default function TimesheetPage() {
   const { user, primaryRole } = useAuth();
   const { toast } = useToast();
-  const isSupervisorOrAbove = ['supervisor', 'manager', 'ceo'].includes(primaryRole);
+  const isSupervisorOrAbove = ['supervisor', 'ceo'].includes(primaryRole);
 
   const [selectedWorkerId, setSelectedWorkerId] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
@@ -53,7 +53,7 @@ export default function TimesheetPage() {
   // Get workers: for supervisors show their assigned workers + all if manager/ceo
   const assignedWorkers = Array.isArray(allProfiles)
     ? (allProfiles as ProfileRow[]).filter(p => {
-        if (primaryRole === 'manager' || primaryRole === 'ceo') return p.id !== user?.id;
+        if (primaryRole === 'ceo') return p.id !== user?.id;
         if (primaryRole === 'supervisor') return p.supervisor_id === user?.id;
         return false;
       })

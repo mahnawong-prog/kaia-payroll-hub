@@ -113,9 +113,9 @@ export default function ProfilePage() {
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
       case 'ceo': return 'bg-accent text-accent-foreground';
-      case 'manager': return 'bg-primary text-primary-foreground';
+      
       case 'supervisor': return 'bg-warning text-warning-foreground';
-      case 'accountant': return 'bg-success text-success-foreground';
+      
       default: return '';
     }
   };
@@ -123,9 +123,9 @@ export default function ProfilePage() {
   const getRoleDescription = () => {
     switch (primaryRole) {
       case 'ceo': return 'Full organizational visibility and management';
-      case 'manager': return 'Operational management, hiring, and pay rates';
+      
       case 'supervisor': return 'Team management, timesheets, and worker oversight';
-      case 'accountant': return 'Financial oversight, payroll, and transaction management';
+      
       case 'worker': return 'Personal timesheets, payslips, and profile management';
       default: return '';
     }
