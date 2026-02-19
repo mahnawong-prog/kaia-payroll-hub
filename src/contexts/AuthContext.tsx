@@ -44,7 +44,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(profile as unknown as UserProfile);
       }
       if (userRoles) {
-        setRoles((userRoles as any[]).map(r => r.role as UserRole));
+        // Map DB enum roles (admin/hr/finance/employee) to app roles (ceo/supervisor/worker)
+        const roleMap: Record<string, UserRole> = {
+          admin: 'ceo',
+          hr: 'supervisor',
+          finance: 'supervisor',
+          employee: 'worker',
+        };
+        setRoles(
+          (userRoles as any[]).map(r => roleMap[r.role] || 'worker')
+        );
       }
     } catch (err) {
       console.error('Error fetching profile:', err);
